@@ -85,9 +85,42 @@ workflow.add_conditional_edges(
     }
 )
 
-workflow.add_edge("PaPM_Expert", "Supervisor")
-workflow.add_edge("ABAP_Developer", "Supervisor")
-workflow.add_edge("Fiori_UX", "Supervisor")
-workflow.add_edge("BW_Architect", "Supervisor")
+
+
+# workflow.add_edge(START, "Supervisor")
+
+# workflow.add_conditional_edges(
+#     "Supervisor",
+#     lambda x: x["next"],
+#     {
+#         "PaPM_Expert": "PaPM_Expert",
+#         "ABAP_Developer": "ABAP_Developer",
+#         "Fiori_UX": "Fiori_UX",
+#         "BW_Architect": "BW_Architect",
+#         "FINISH": END
+#     }
+# )
+
+# workflow.add_edge("PaPM_Expert", "Supervisor")
+# workflow.add_edge("ABAP_Developer", "Supervisor")
+# workflow.add_edge("Fiori_UX", "Supervisor")
+# workflow.add_edge("BW_Architect", "Supervisor")
+
+
+# graph.py
+
+# ... (Previous code remains the same) ...
+
+
+# --- OPTIMIZATION: Direct to END ---
+# Previously, these went back to "Supervisor", costing an extra API call.
+# Now, we assume one answer is enough for this prototype.
+workflow.add_edge("PaPM_Expert", END)
+workflow.add_edge("ABAP_Developer", END)
+workflow.add_edge("Fiori_UX", END)
+workflow.add_edge("BW_Architect", END)
+
 
 app_graph = workflow.compile()
+
+

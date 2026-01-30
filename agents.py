@@ -4,16 +4,40 @@ load_dotenv()
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-# --- Initialize Gemini (Free Tier Optimized) ---
-# We use 'gemini-1.5-flash' because it is lighter and more stable on free tier.
-# We add max_retries=5 to automatically handle 500/503 server errors.
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.0-flash",
+
+import time
+from langchain_core.language_models.chat_models import BaseChatModel
+
+# ... imports ...
+
+# --- Throttled Gemini Wrapper ---
+# This forces a 2-second pause before every request
+class ThrottledGemini(ChatGoogleGenerativeAI):
+    def invoke(self, input, config=None, **kwargs):
+        time.sleep(2)  # <--- The "Breath" (Adjust to 4 if still failing)
+        return super().invoke(input, config, **kwargs)
+
+# Initialize using the Wrapper
+llm = ThrottledGemini(
+    model="gemini-2.0-flash-lite",
     temperature=0,
     max_retries=5,
     request_timeout=60,
     convert_system_message_to_human=True
 )
+
+# ... (Rest of the file remains the same) ...
+
+# # --- Initialize Gemini (Free Tier Optimized) ---
+# # We use 'gemini-1.5-flash' because it is lighter and more stable on free tier.
+# # We add max_retries=5 to automatically handle 500/503 server errors.
+# llm = ChatGoogleGenerativeAI(
+#     model="gemini-2.0-flash",
+#     temperature=0,
+#     max_retries=5,
+#     request_timeout=60,
+#     convert_system_message_to_human=True
+# )
 
 # --- 1. PaPM Agent ---
 papm_prompt = ChatPromptTemplate.from_messages([
