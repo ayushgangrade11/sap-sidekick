@@ -1,56 +1,56 @@
 from dotenv import load_dotenv
-load_dotenv()  # Load GOOGLE_API_KEY from .env
+load_dotenv()
 
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-# --- Initialize Gemini ---
-# We use gemini-1.5-pro for high reasoning capability
+# --- Initialize Gemini (Free Tier Optimized) ---
+# We use 'gemini-1.5-flash' because it is lighter and more stable on free tier.
+# We add max_retries=5 to automatically handle 500/503 server errors.
 llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",  # Changed from "gemini-1.5-pro"
+    model="gemini-2.0-flash",
     temperature=0,
+    max_retries=5,
+    request_timeout=60,
     convert_system_message_to_human=True
 )
-# --- 1. PaPM Agent (Financial Modeling Expert) ---
+
+# --- 1. PaPM Agent ---
 papm_prompt = ChatPromptTemplate.from_messages([
     ("system", 
-     "You are a Senior SAP PaPM (Profitability and Performance Management) Consultant. "
-     "Your expertise includes: Allocations, FS-PER, HANA Calculation Views, and Simulation. "
-     "When asked about modeling, always suggest the specific 'Function Type' (e.g., Allocation, Join, View). "
-     "If the user asks for a simulation, define the 'Drivers' and 'Granularity'."),
+     "You are a Senior SAP PaPM Consultant. "
+     "Expertise: Allocations, FS-PER, HANA Calculation Views. "
+     "Suggest specific 'Function Types' and 'Drivers' for simulations."),
     MessagesPlaceholder(variable_name="messages"),
 ])
 papm_agent = papm_prompt | llm
 
-# --- 2. ABAP Agent (Backend Coding Expert) ---
+# --- 2. ABAP Agent ---
 abap_prompt = ChatPromptTemplate.from_messages([
     ("system", 
-     "You are an Expert SAP ABAP Developer specializing in RAP (Restful ABAP Programming) and BTP. "
-     "Always provide syntactically correct ABAP code. "
-     "Use modern syntax (inline declarations, VALUE operators). "
-     "If asked for data access, prefer CDS Views over direct SELECT statements."),
+     "You are an Expert SAP ABAP Developer (RAP & BTP). "
+     "Output syntactically correct ABAP code with inline declarations. "
+     "Prefer CDS Views over direct SELECTs."),
     MessagesPlaceholder(variable_name="messages"),
 ])
 abap_agent = abap_prompt | llm
 
-# --- 3. Fiori Agent (Frontend UX Expert) ---
+# --- 3. Fiori Agent ---
 fiori_prompt = ChatPromptTemplate.from_messages([
     ("system", 
      "You are an SAP Fiori & UI5 Expert. "
-     "Focus on SAP Fiori Elements and OData V4 annotations. "
-     "When asked for UI code, provide XML Views or manifest.json configurations. "
-     "Always ensure accessibility and responsive design principles."),
+     "Focus on Fiori Elements, OData V4, and manifest.json. "
+     "Provide XML Views when asked for UI."),
     MessagesPlaceholder(variable_name="messages"),
 ])
 fiori_agent = fiori_prompt | llm
 
-# --- 4. BW/Data Agent (Data Warehousing Expert) ---
+# --- 4. BW Agent ---
 bw_prompt = ChatPromptTemplate.from_messages([
     ("system", 
-     "You are an SAP BW/4HANA and Datasphere Architect. "
-     "Your focus is on ADSOs, Composite Providers, and Data Lineage. "
-     "Explain how data flows from source (S/4HANA) to the final reporting layer. "
-     "Prioritize LSA++ architecture patterns."),
+     "You are an SAP BW/4HANA Architect. "
+     "Focus on ADSOs, Composite Providers, and LSA++ architecture. "
+     "Explain data lineage clearly."),
     MessagesPlaceholder(variable_name="messages"),
 ])
 bw_agent = bw_prompt | llm
